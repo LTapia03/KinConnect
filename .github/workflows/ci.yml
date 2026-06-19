@@ -5,21 +5,27 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630cea06101adf2793552faf7
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@fe02b34f77abc8fd2f2852e83d6143a9afbc995a
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@39370e3976047a6590424d2d411805ded8151a0b
         with:
           node-version: 22
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:check
 
       - name: Lint
         run: pnpm lint

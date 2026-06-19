@@ -13,7 +13,7 @@ Von Rosenberg family reunion registration platform — registration, schedule, a
 
 ## Prerequisites
 
-- Node.js 20+
+- Node.js 22+ (matches CI)
 - [pnpm](https://pnpm.io/) 9+
 - [Supabase CLI](https://supabase.com/docs/guides/cli) (for local database)
 
@@ -27,16 +27,18 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+The `dev` script builds `@von-rosenberg/shared` before starting Next.js so workspace imports resolve to `dist/`.
+
 ### Environment variables
 
 Copy `.env.example` to `apps/web/.env.local` and fill in values from your Supabase project dashboard:
 
-| Variable | Purpose |
-|----------|---------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-side admin operations |
-| `RESEND_API_KEY` | Transactional email (future tickets) |
+| Variable                        | Purpose                                                   |
+| ------------------------------- | --------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL                                      |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key                                           |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Server-side admin operations (never expose to the client) |
+| `RESEND_API_KEY`                | Transactional email (future tickets)                      |
 
 ### Supabase local setup
 
@@ -51,7 +53,7 @@ Run `supabase status` to copy local API URL and anon key into `.env.local`.
 
 ### Promote an admin user
 
-1. Sign up through Supabase Auth (or create a user in Supabase Studio).
+1. Sign up through Supabase Auth with `first_name`, `last_name`, and `phone` in user metadata.
 2. Run in the SQL editor:
 
 ```sql
@@ -66,18 +68,18 @@ Replace `your-admin@example.com` with the admin email address.
 
 ### Verify RLS policies
 
-See `supabase/scripts/test-rls.sql` for a manual checklist covering registrant isolation, public schedule reads, and admin-only writes.
+See `supabase/scripts/test-rls.sql` for a manual checklist covering registrant isolation, role-escalation prevention, public schedule reads, and admin-only writes.
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start Next.js dev server |
-| `pnpm build` | Build shared package and web app |
-| `pnpm lint` | ESLint across workspaces |
-| `pnpm test` | Vitest with coverage |
-| `pnpm format` | Prettier write |
-| `pnpm format:check` | Prettier check |
+| Command             | Description                                       |
+| ------------------- | ------------------------------------------------- |
+| `pnpm dev`          | Build shared package and start Next.js dev server |
+| `pnpm build`        | Build shared package and web app                  |
+| `pnpm lint`         | ESLint across workspaces                          |
+| `pnpm test`         | Vitest with coverage                              |
+| `pnpm format`       | Prettier write                                    |
+| `pnpm format:check` | Prettier check                                    |
 
 ## Project layout
 

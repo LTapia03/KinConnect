@@ -42,4 +42,34 @@ describe('pricing constants', () => {
 
     expect(summary.totalCents).toBe(0);
   });
+
+  it('rejects negative nights count', () => {
+    expect(() =>
+      calculatePricingSummary({
+        nightsCount: -1,
+        mealCounts: {
+          fridayDinner: 0,
+          saturdayBreakfast: 0,
+          saturdayLunch: 0,
+          saturdayDinner: 0,
+          sundayBreakfast: 0,
+        },
+      }),
+    ).toThrow(/nightsCount/i);
+  });
+
+  it('rejects negative meal counts', () => {
+    expect(() =>
+      calculatePricingSummary({
+        nightsCount: 1,
+        mealCounts: {
+          fridayDinner: -1,
+          saturdayBreakfast: 0,
+          saturdayLunch: 0,
+          saturdayDinner: 0,
+          sundayBreakfast: 0,
+        },
+      }),
+    ).toThrow(/meal/i);
+  });
 });

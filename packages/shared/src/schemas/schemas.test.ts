@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ProfileSchema } from './profile';
-import { RegistrationSchema } from './registration';
+import { RegistrationInsertSchema, RegistrationSchema } from './registration';
 import { ScheduleEventSchema } from './schedule-event';
 import { AnnouncementSchema } from './announcement';
 import { EmailCampaignSchema } from './email-campaign';
@@ -100,9 +100,7 @@ describe('RegistrationSchema', () => {
   });
 
   it('rejects negative party counts', () => {
-    expect(() =>
-      RegistrationSchema.parse({ ...validRegistration, adultsCount: -1 }),
-    ).toThrow();
+    expect(() => RegistrationSchema.parse({ ...validRegistration, adultsCount: -1 })).toThrow();
   });
 
   it('rejects invalid meal counts', () => {
@@ -112,9 +110,7 @@ describe('RegistrationSchema', () => {
   });
 
   it('rejects invalid branch', () => {
-    expect(() =>
-      RegistrationSchema.parse({ ...validRegistration, branch: 'branch_6' }),
-    ).toThrow();
+    expect(() => RegistrationSchema.parse({ ...validRegistration, branch: 'branch_6' })).toThrow();
   });
 
   it('rejects invalid email', () => {
@@ -144,6 +140,19 @@ describe('RegistrationSchema', () => {
     expect(() =>
       RegistrationSchema.parse({ ...validRegistration, contactFirstName: '   ' }),
     ).toThrow();
+  });
+});
+
+describe('RegistrationInsertSchema', () => {
+  it('omits status so clients cannot submit directly', () => {
+    const insertPayload = { ...validRegistration };
+    delete (insertPayload as Partial<typeof insertPayload>).status;
+    const result = RegistrationInsertSchema.parse(insertPayload);
+    expect(result.contactEmail).toBe('anna@example.com');
+  });
+
+  it('rejects payloads that include status', () => {
+    expect(() => RegistrationInsertSchema.parse(validRegistration)).toThrow();
   });
 });
 

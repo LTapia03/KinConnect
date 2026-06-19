@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings 0",
-    "test": "vitest run --coverage"
+    "test": "pnpm --filter @von-rosenberg/shared build && vitest run --coverage"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

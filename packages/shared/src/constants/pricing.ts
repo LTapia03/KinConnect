@@ -23,10 +23,16 @@ export type PricingSummary = {
 };
 
 export function calculatePricingSummary(input: PricingSummaryInput): PricingSummary {
-  const mealTotalCount = Object.values(input.mealCounts).reduce(
-    (total, count) => total + count,
-    0,
-  );
+  if (input.nightsCount < 0) {
+    throw new Error('nightsCount cannot be negative');
+  }
+
+  const mealTotalCount = Object.values(input.mealCounts).reduce((total, count) => {
+    if (count < 0) {
+      throw new Error('meal counts cannot be negative');
+    }
+    return total + count;
+  }, 0);
 
   const nightlyTotalCents = PRICING.nightlyRateCents * input.nightsCount;
   const mealTotalCents = PRICING.mealRateCents * mealTotalCount;

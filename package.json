@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @von-rosenberg/web dev",
+    "dev": "pnpm --filter @von-rosenberg/shared build && pnpm --filter @von-rosenberg/web dev",
     "build": "pnpm --filter @von-rosenberg/shared build && pnpm --filter @von-rosenberg/web build",
     "lint": "pnpm -r lint",
     "test": "pnpm --filter @von-rosenberg/shared build && pnpm -r test",
