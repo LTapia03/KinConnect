@@ -1,8 +1,10 @@
 -- Seed data for local development.
--- Admin profile: sign up via Supabase Auth, then promote with:
+-- Admin profile: sign up via Supabase Auth with first_name, last_name, and phone metadata,
+-- then promote with:
 --   update public.profiles set role = 'admin' where id = (
 --     select id from auth.users where email = 'admin@example.com'
 --   );
+-- Seeding auth.users directly is environment-specific; use the promotion step above for local admin access.
 
 insert into public.schedule_events (
   title,

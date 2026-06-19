@@ -29,9 +29,9 @@ create type public.email_campaign_status as enum ('draft', 'sent');
 create table public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   role public.user_role not null default 'registrant',
-  first_name text not null,
-  last_name text not null,
-  phone text not null,
+  first_name text not null check (btrim(first_name) <> ''),
+  last_name text not null check (btrim(last_name) <> ''),
+  phone text not null check (btrim(phone) <> ''),
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
@@ -75,7 +75,8 @@ create table public.registrations (
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now()),
   constraint registrations_nights_present check (
-    cardinality(nights_staying) > 0 or nights_other is not null
+    cardinality(nights_staying) > 0
+    or (nights_other is not null and btrim(nights_other) <> '')
   )
 );
 
@@ -156,14 +157,17 @@ language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  v_first_name text := btrim(coalesce(new.raw_user_meta_data ->> 'first_name', ''));
+  v_last_name text := btrim(coalesce(new.raw_user_meta_data ->> 'last_name', ''));
+  v_phone text := btrim(coalesce(new.raw_user_meta_data ->> 'phone', ''));
 begin
+  if v_first_name = '' or v_last_name = '' or v_phone = '' then
+    raise exception 'Signup metadata must include first_name, last_name, and phone';
+  end if;
+
   insert into public.profiles (id, first_name, last_name, phone)
-  values (
-    new.id,
-    coalesce(new.raw_user_meta_data ->> 'first_name', ''),
-    coalesce(new.raw_user_meta_data ->> 'last_name', ''),
-    coalesce(new.raw_user_meta_data ->> 'phone', '')
-  );
+  values (new.id, v_first_name, v_last_name, v_phone);
   return new;
 end;
 $$;
@@ -185,3 +189,20 @@ as $$
     where id = auth.uid() and role = 'admin'
   );
 $$;
+
+create or replace function public.prevent_role_escalation()
+returns trigger
+language plpgsql
+as $$
+begin
+  if old.role is distinct from new.role and not public.is_admin() then
+    raise exception 'Only admins can change profile roles';
+  end if;
+
+  return new;
+end;
+$$;
+
+create trigger profiles_prevent_role_escalation
+before update on public.profiles
+for each row execute function public.prevent_role_escalation();

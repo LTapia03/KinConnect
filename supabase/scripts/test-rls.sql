@@ -18,7 +18,11 @@
 -- insert into public.schedule_events (...) values (...); -- should be denied
 -- insert into public.email_campaigns (subject, body) values ('Test', 'Body'); -- denied
 
--- 5. As admin, verify full access:
+-- 5. As registrant, verify role escalation is blocked:
+-- update public.profiles set role = 'admin' where id = auth.uid(); -- must fail
+-- Expected: ERROR permission denied or "Only admins can change profile roles"
+
+-- 6. As admin, verify full access:
 -- select * from public.registrations;
 -- insert/update/delete on schedule_events and announcements should succeed
 
