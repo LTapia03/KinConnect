@@ -3,7 +3,7 @@ import { ProfileSchema, ProfileUpdateSchema } from './profile';
 import { RegistrationInsertSchema, RegistrationSchema } from './registration';
 import { ScheduleEventSchema } from './schedule-event';
 import { AnnouncementSchema } from './announcement';
-import { EmailCampaignSchema } from './email-campaign';
+import { EmailCampaignInsertSchema, EmailCampaignSchema } from './email-campaign';
 
 const validRegistration = {
   contactFirstName: 'Anna',
@@ -256,12 +256,58 @@ describe('EmailCampaignSchema', () => {
     expect(result.status).toBe('draft');
   });
 
+  it('accepts sent metadata fields', () => {
+    const result = EmailCampaignSchema.parse({
+      subject: 'Reunion Reminder',
+      body: 'See you soon!',
+      status: 'sent',
+      sentAt: '2026-07-01T12:00:00.000Z',
+      sentBy: '11111111-1111-1111-1111-111111111111',
+      recipientCount: 42,
+    });
+
+    expect(result.recipientCount).toBe(42);
+    expect(result.sentBy).toBe('11111111-1111-1111-1111-111111111111');
+  });
+
   it('rejects invalid status', () => {
     expect(() =>
       EmailCampaignSchema.parse({
         subject: 'Hello',
         body: 'Body',
         status: 'queued',
+      }),
+    ).toThrow();
+  });
+
+  it('rejects negative recipient counts', () => {
+    expect(() =>
+      EmailCampaignSchema.parse({
+        subject: 'Hello',
+        body: 'Body',
+        status: 'draft',
+        recipientCount: -1,
+      }),
+    ).toThrow();
+  });
+});
+
+describe('EmailCampaignInsertSchema', () => {
+  it('accepts subject and body without server fields', () => {
+    const result = EmailCampaignInsertSchema.parse({
+      subject: 'Reunion Reminder',
+      body: 'See you soon!',
+    });
+
+    expect(result.subject).toBe('Reunion Reminder');
+  });
+
+  it('rejects payloads that include status', () => {
+    expect(() =>
+      EmailCampaignInsertSchema.parse({
+        subject: 'Hello',
+        body: 'Body',
+        status: 'sent',
       }),
     ).toThrow();
   });

@@ -1,10 +1,58 @@
 -- Seed data for local development.
--- Admin profile: sign up via Supabase Auth with first_name, last_name, and phone metadata,
--- then promote with:
---   update public.profiles set role = 'admin' where id = (
---     select id from auth.users where email = 'admin@example.com'
---   );
--- Seeding auth.users directly is environment-specific; use the promotion step above for local admin access.
+-- Default admin: admin@example.com / localdevpassword
+
+insert into auth.users (
+  instance_id,
+  id,
+  aud,
+  role,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  created_at,
+  updated_at
+)
+values (
+  '00000000-0000-0000-0000-000000000000',
+  '11111111-1111-1111-1111-111111111111',
+  'authenticated',
+  'authenticated',
+  'admin@example.com',
+  crypt('localdevpassword', gen_salt('bf')),
+  timezone('utc', now()),
+  '{"provider":"email","providers":["email"]}'::jsonb,
+  '{"first_name":"Local","last_name":"Admin","phone":"512-555-0199"}'::jsonb,
+  timezone('utc', now()),
+  timezone('utc', now())
+);
+
+insert into auth.identities (
+  id,
+  user_id,
+  provider_id,
+  identity_data,
+  provider,
+  last_sign_in_at,
+  created_at,
+  updated_at
+)
+values (
+  '11111111-1111-1111-1111-111111111111',
+  '11111111-1111-1111-1111-111111111111',
+  'admin@example.com',
+  jsonb_build_object(
+    'sub', '11111111-1111-1111-1111-111111111111',
+    'email', 'admin@example.com'
+  ),
+  'email',
+  timezone('utc', now()),
+  timezone('utc', now()),
+  timezone('utc', now())
+);
+
+select public.promote_to_admin('admin@example.com');
 
 insert into public.schedule_events (
   title,
