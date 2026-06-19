@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
-const trimmedString = (label: string) =>
-  z.string().trim().min(1, `${label} is required`);
+const trimmedString = (label: string) => z.string().trim().min(1, `${label} is required`);
 
 export const AnnouncementSchema = z.object({
   title: trimmedString('Title'),

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ProfileSchema } from './profile';
+import { ProfileSchema, ProfileUpdateSchema } from './profile';
 import { RegistrationInsertSchema, RegistrationSchema } from './registration';
 import { ScheduleEventSchema } from './schedule-event';
 import { AnnouncementSchema } from './announcement';
@@ -64,6 +64,29 @@ describe('ProfileSchema', () => {
         lastName: 'von Rosenberg',
         phone: '512-555-0100',
         role: 'owner',
+      }),
+    ).toThrow();
+  });
+});
+
+describe('ProfileUpdateSchema', () => {
+  it('accepts profile fields without role', () => {
+    const result = ProfileUpdateSchema.parse({
+      firstName: 'Anna',
+      lastName: 'von Rosenberg',
+      phone: '512-555-0100',
+    });
+
+    expect(result.firstName).toBe('Anna');
+  });
+
+  it('rejects payloads that include role', () => {
+    expect(() =>
+      ProfileUpdateSchema.parse({
+        firstName: 'Anna',
+        lastName: 'von Rosenberg',
+        phone: '512-555-0100',
+        role: 'admin',
       }),
     ).toThrow();
   });
