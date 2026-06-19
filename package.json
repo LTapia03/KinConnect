@@ -1,0 +1,22 @@
+{
+  "name": "von-rosenberg-reunion",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter @von-rosenberg/shared build && pnpm --filter @von-rosenberg/web dev",
+    "build": "pnpm --filter @von-rosenberg/shared build && pnpm --filter @von-rosenberg/web build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm --filter @von-rosenberg/shared build && pnpm -r test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "typescript-eslint": "^8.21.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
