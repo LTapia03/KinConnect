@@ -8,12 +8,14 @@ Von Rosenberg family reunion registration platform — registration, schedule, a
 
 - **Web:** Next.js 15 (App Router), TypeScript, Tailwind CSS
 - **Shared:** `@von-rosenberg/shared` — Zod schemas, types, pricing constants
+- **Database:** Supabase (PostgreSQL, Auth, RLS)
 - **Package manager:** pnpm workspaces
 
 ## Prerequisites
 
 - Node.js 22+ (matches CI)
 - [pnpm](https://pnpm.io/) 9+
+- [Supabase CLI](https://supabase.com/docs/guides/cli) (for local database)
 
 ## Local development
 
@@ -29,34 +31,61 @@ The `dev` script builds `@von-rosenberg/shared` before starting Next.js so works
 
 ### Environment variables
 
-Copy `.env.example` to `apps/web/.env.local` and fill in values when integrating Supabase (future tickets):
+Copy `.env.example` to `apps/web/.env.local` and fill in values from your Supabase project dashboard:
 
-| Variable | Purpose |
-|----------|---------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-side admin operations (never expose to the client) |
-| `RESEND_API_KEY` | Transactional email (future tickets) |
+| Variable                        | Purpose                                                   |
+| ------------------------------- | --------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL                                      |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key                                           |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Server-side admin operations (never expose to the client) |
+| `RESEND_API_KEY`                | Transactional email (future tickets)                      |
+
+### Supabase local setup
+
+```bash
+supabase start
+supabase db reset
+```
+
+Migrations live in `supabase/migrations/`. Seed data loads from `supabase/seed.sql`.
+
+Run `supabase status` to copy local API URL and anon key into `.env.local`.
+
+Local seed includes `admin@example.com` / `localdevpassword` (see `supabase/seed.sql`).
+
+### Promote an admin user
+
+For additional admins after signup:
+
+```sql
+select public.promote_to_admin('your-admin@example.com');
+```
+
+Signup must include `first_name`, `last_name`, and `phone` in user metadata.
+
+### Verify RLS policies
+
+See `supabase/scripts/test-rls.sql` for a manual checklist covering registrant isolation, role-escalation prevention, registration status enforcement, public schedule reads, and admin-only writes.
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Build shared package and start Next.js dev server |
-| `pnpm build` | Build shared package and web app |
-| `pnpm lint` | ESLint across workspaces |
-| `pnpm test` | Vitest with coverage |
-| `pnpm format` | Prettier write |
-| `pnpm format:check` | Prettier check |
+| Command             | Description                                       |
+| ------------------- | ------------------------------------------------- |
+| `pnpm dev`          | Build shared package and start Next.js dev server |
+| `pnpm build`        | Build shared package and web app                  |
+| `pnpm lint`         | ESLint across workspaces                          |
+| `pnpm test`         | Vitest with coverage                              |
+| `pnpm format`       | Prettier write                                    |
+| `pnpm format:check` | Prettier check                                    |
 
 ## Project layout
 
 ```
 apps/web/              Next.js web application
 packages/shared/       Shared Zod schemas, types, constants
+supabase/migrations/   SQL migrations and RLS policies
+supabase/seed.sql      Sample schedule events and announcements
 ```
-
-Supabase migrations, RLS policies, and seed data are added in [SCRUM-8](https://luistapia03.atlassian.net/browse/SCRUM-8).
 
 ## Jira
 
